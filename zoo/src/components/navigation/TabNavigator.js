@@ -4,7 +4,6 @@ import { useTheme } from "react-native-paper";
 import { Image } from "react-native";
 
 import cattleScreen from "../../screens/cattleScreen";
-
 import MilkScreen from "../../screens/MilkScreen";
 import { MainStackNavigator, ContactStackNavigator } from "./StackNavigator";
 
@@ -17,7 +16,7 @@ const BottomTabNavigator = () => {
     <Tab.Navigator
       activeColor={colors.primary}
       inactiveColor={colors.onBackground}
-      barStyle={{ backgroundColor: 'white' }}
+      barStyle={{ backgroundColor: colors.background }} // Use background color from theme
       initialRouteName='Homescreen'
     >
       <Tab.Screen
@@ -25,36 +24,30 @@ const BottomTabNavigator = () => {
           tabBarLabel: 'Home',
           tabBarIcon: ({ color }) => (
             <Image
-              source={require('../../assets/icons8-home-64.png')}
-              style={{ tintColor: color, width: 26, height: 26 }}
+              source={require('../../assets/icons8-home-642.png')}
+              style={{ tintColor: color, width: 37, height: 30 }}
             />
           ),
         }}
         name="Homescreen" component={MainStackNavigator} />
       <Tab.Screen
         options={{
-          tabBarLabel: 'cattle',
+          tabBarLabel: 'Cattle',
           tabBarIcon: ({ color }) => (
             <Image
-              source={require('../../assets/menu.png')}
-              style={{ tintColor: color, width: 26, height: 26 }}
+              source={require('../../assets/icons8-menu-50.png')}
+              style={{ tintColor: color, width: 37, height: 30 }}
             />
           ),
         }}
         name="cattle" component={cattleScreen} />
-
-      {/* navigationOptions:()=>{
-          return {
-            tabBarVisible:false,
-          };
-      */}
       <Tab.Screen
         options={{
           tabBarLabel: 'Milk',
           tabBarIcon: ({ color }) => (
             <Image
-              source={require('../../assets/icons8-milk-50.png')}
-              style={{ tintColor: color, width: 26, height: 26 }}
+              source={require('../../assets/icons8-drink-50.png')}
+              style={{ tintColor: color, width: 37, height: 30 }}
             />
           ),
         }}

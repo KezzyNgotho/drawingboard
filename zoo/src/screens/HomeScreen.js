@@ -25,7 +25,7 @@ const HomeScreen = () => {
       {/* Top Container */}
       <View style={styles.topContainer}>
         <View style={styles.farmInfoContainer}>
-          <Image source={require('../assets/gardening.png')} style={styles.logo} resizeMode="contain" />
+          <Image source={require('../assets/icons8-farm-40.png')} style={styles.logo} resizeMode="contain" />
           <Text style={styles.farmName}>Farm Name</Text>
         </View>
         <View style={styles.notificationContainer}>
@@ -44,7 +44,7 @@ const HomeScreen = () => {
       {/* Greeting */}
       <Text style={styles.greetingContainer}>
   <Text style={styles.greeting}>{`${greeting}`}</Text>
-  <Text style={styles.currentDay}>{` ${currentDay}`}</Text>
+  {/* <Text style={styles.currentDay}>{` ${currentDay}`}</Text> */}
 </Text>
 
       {/* Quick Access Buttons */}
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#fff',
-    height: 65,
+    height: 75,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',

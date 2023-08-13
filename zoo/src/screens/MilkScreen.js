@@ -1,232 +1,426 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button, TextInput, FlatList, TouchableOpacity,Image} from 'react-native';
-import Modal from 'react-native-modal';
-import CalendarPicker from 'react-native-calendar-picker';
-import Icon from 'react-native-vector-icons/Ionicons';
-
+import React, {useState}from 'react';
+import { View, Text, StyleSheet, TouchableOpacity,ScrollView,Modal,TextInput } from 'react-native';
+import { Calendar } from 'react-native-calendars';
+import {Picker} from '@react-native-picker/picker';
+import {DatePicker} from 'react-native-datepicker'
 const MilkScreen = () => {
-  const [modalVisible, setModalVisible] = useState(false);
+
+  const [isCollectingMilk, setIsCollectingMilk] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [cattle, setCattle] = useState('');
-  const [time, setTime] = useState('');
-  const [milkProduced, setMilkProduced] = useState('');
-  const [milkUsage, setMilkUsage] = useState('');
-  const [milkRecords, setMilkRecords] = useState([]);
-  const [visibleIcons, setVisibleIcons] = useState(4); // Maximum number of visible icons in the row
-  const [showAllModal, setShowAllModal] = useState(false);
+  const [selectedCattle, setSelectedCattle] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [milkQuantity, setMilkQuantity] = useState('');
 
-  const handleAddRecord = () => {
-    setModalVisible(true);
+  const toggleCollectingMilk = () => {
+    setIsCollectingMilk(!isCollectingMilk);
   };
 
-  const handleRecordMilk = () => {
-    // Save milk production and usage records to state
-    const newRecord = {
-      cattle,
-      date: selectedDate.toISOString().split('T')[0],
-      time,
-      milkProduced: milkProduced !== '' ? parseFloat(milkProduced) : 0,
-      milkUsage: milkUsage !== '' ? parseFloat(milkUsage) : 0,
-    };
-    setMilkRecords((prevRecords) => [...prevRecords, newRecord]);
-    // Reset input fields after recording
-    setCattle('');
-    setSelectedDate(null);
-    setTime('');
-    setMilkProduced('');
-    setMilkUsage('');
-    setModalVisible(false);
+  const handleMilkCollection = () => {
+    // Logic to handle milk collection and record details
+    // You can use the selectedDate, selectedCattle, and milkQuantity here
+    toggleCollectingMilk();
   };
 
-  const totalProduced = milkRecords.reduce((acc, record) => acc + record.milkProduced, 0);
-  const totalUsage = milkRecords.reduce((acc, record) => acc + record.milkUsage, 0);
-
-  const iconsData = [
-    { image: require('../assets/icons8-week-40.png'),label:'This Week' },
-    { image: require('../assets/icons8-month-48.png'), label: 'This Month' },
-    { image: require('../assets/icons8-add-50.png'), label: 'New Records' },
-    { image: require('../assets/icons8-sales-50.png'), label: 'Sales' },
-  ];
-  
-  const renderIconItem = ({ item }) => (
-    <TouchableOpacity style={styles.iconContainer}>
-      <Image source={item.image} style={styles.iconImage} resizeMode="contain" />
-      <Text style={styles.iconLabel}>{item.label}</Text>
-    </TouchableOpacity>
-  );
-  
-  const renderAllIcons = ({ item }) => (
-    <TouchableOpacity style={styles.iconContainer}>
-      <Image source={item.image} style={styles.iconImage} resizeMode="contain" />
-      <Text style={styles.iconLabel}>{item.label}</Text>
-    </TouchableOpacity>
-  );
-  
-  const toggleShowAllModal = () => {
-    setShowAllModal(true);
-  };
+  const currentHour = new Date().getHours();
+  let greeting = '';
+  if (currentHour >= 0 && currentHour < 12) {
+    greeting = 'Good morning!';
+  } else if (currentHour >= 12 && currentHour < 18) {
+    greeting = 'Good afternoon!';
+  } else {
+    greeting = 'Good evening!';
+  }
 
   return (
-  
-      <View style={styles.container}>
-        {/* Top Container */}
-      <View style={styles.topContainer}>
-        {/* Farm Logo and Name */}
-        <View style={styles.farmInfoContainer}>
-          <Image source={require('../assets/gardening.png')} style={styles.logo} resizeMode="contain" />
-          <Text style={styles.farmName}>Farm Name</Text>
-        </View>
-
-        {/* Notification Menu and User Profile */}
-        <View style={styles.notificationContainer}>
-          <Image source={require('../assets/active.png')} style={styles.icon} resizeMode="contain" />
-          <Image source={require('../assets/menu.png')} style={styles.icon} resizeMode="contain" />
-          <Image source={require('../assets/user.png')} style={styles.icon} resizeMode="contain" />
-        </View>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton}>
+          {/* Add back button icon */}
+        </TouchableOpacity>
+        <Text style={styles.greeting}>{greeting}</Text>
       </View>
-      <View style={styles.totalContainer}>
-        <View>
-        <Text style={[styles.totalText, styles.whiteText]}>Production Today: {totalProduced} liters</Text>
-        </View>
-       
-        <Text style={[styles.totalText, styles.whiteText]}>Usage Today: {totalUsage} liters</Text>
-      </View>
-
-       {/* Container for Icons */}
-       <View style={styles.iconsContainer}>
-        {iconsData.slice(0, visibleIcons).map((item, index) => (
-          <TouchableOpacity key={index} style={styles.iconContainer}>
-            <Image source={item.image} style={styles.iconImage} resizeMode="contain" />
-            <Text style={styles.iconLabel}>{item.label}</Text>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+      <View style={styles.card}>
+          {/* Collect Milk Button */}
+          <TouchableOpacity style={styles.collectButton} onPress={toggleCollectingMilk}>
+            <Text style={styles.collectButtonText}>Collect Milk</Text>
           </TouchableOpacity>
-        ))}
-
-        {iconsData.length > visibleIcons && (
-          <TouchableOpacity style={styles.moreIconContainer} onPress={toggleShowAllModal}>
-            <Image source={require('../assets/icons8-more-25.png')} style={styles.moreIcon} resizeMode="contain" />
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.button} onPress={() => {/* Handle usage */}}>
+              <Text style={styles.buttonText}>Usage</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => {/* Handle sell */}}>
+              <Text style={styles.buttonText}>Sell</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.setPriceButton} onPress={() => {/* Handle set price */}}>
+            <Text style={styles.setPriceButtonText}>Set Price</Text>
           </TouchableOpacity>
-        )}
+        </View>
+      <View style={styles.card}>
+      {/* Total Production Summary */}
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Total Production Summary</Text>
+        <View style={styles.summaryCard}>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Today:</Text>
+            <Text style={styles.summaryValue}>XXX gallons</Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>This Week:</Text>
+            <Text style={styles.summaryValue}>XXX gallons</Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>This Month:</Text>
+            <Text style={styles.summaryValue}>XXX gallons</Text>
+          </View>
+        </View>
       </View>
 
-      {/* Reports */}
-      <View style={styles.reportsContainer}>
-        <Text>REPORTS</Text>
-        {/* Add your report components here */}
+      {/* Total Usage Summary */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Total Usage Summary</Text>
+        <View style={styles.usageCard}>
+          <View style={styles.usageRow}>
+            {/* Consumption */}
+            <View style={styles.card1}>
+              <Text style={styles.usageLabel}>Home</Text>
+              <Text style={styles.usageValue}>Today: XXX </Text>
+              <Text style={styles.usageValue}>This Week: XXX </Text>
+              <Text style={styles.usageValue}>This Month: XXX </Text>
+            </View>
+
+            {/* Calves */}
+            <View style={styles.card1}>
+              <Text style={styles.usageLabel}>Calves</Text>
+              <Text style={styles.usageValue}>Today: XXX </Text>
+              <Text style={styles.usageValue}>This Week: XXX </Text>
+              <Text style={styles.usageValue}>This Month: XXX </Text>
+            </View>
+
+            {/* Dairy */}
+            <View style={styles.card1}>
+              <Text style={styles.usageLabel}>Dairy</Text>
+              <Text style={styles.usageValue}>Today: XXX </Text>
+              <Text style={styles.usageValue}>This Week: XXX </Text>
+              <Text style={styles.usageValue}>This Month: XXX </Text>
+            </View>
+          </View>
+        </View>
       </View>
+      </View>
+      {/* Download Statements Section */}
+      <TouchableOpacity style={styles.StatementsButton}>
+        <Text style={styles.StatementsButttonText}>Download Statements</Text>
+        {/* Add content and download buttons */}
+      </TouchableOpacity>
+      </ScrollView>
+
+
+    {/* Milk Collection Modal */}
+<Modal visible={isCollectingMilk} transparent animationType="slide">
+  <View style={styles.modalContainer}>
+    <TouchableOpacity style={styles.closeButton} onPress={toggleCollectingMilk}>
+      {/* Add close icon */}
+    </TouchableOpacity>
+    <Text style={styles.modalTitle}>Collect Milk</Text>
+   {/*  <Calendar
+      onDayPress={(day) => setSelectedDate(day.dateString)}
+      // Customize calendar appearance here
+    /> */}
+
+    {/* Cattle Selection */}
+    <View style={styles.inputContainer}>
+      <Text style={styles.inputLabel}>Select Cattle:</Text>
+      <Picker
+        selectedValue={selectedCattle}
+        style={styles.picker}
+        onValueChange={(itemValue) => setSelectedCattle(itemValue)}
+      >
+        <Picker.Item label="Rahab" value="Rahab" />
+        <Picker.Item label="Lesly" value="Lesly" />
+        {/* Add more cattle options as needed */}
+      </Picker>
+    </View>
+
+    <View style={styles.inputContainer}>
+      <Text style={styles.inputLabel}>Select Time:</Text>
+      <Picker
+        selectedValue={selectedTime}
+        style={styles.picker}
+        onValueChange={(itemValue) => setSelectedTime(itemValue)}
+      >
+        <Picker.Item label="Morning" value="Morning" />
+        <Picker.Item label="Afternoon" value="Afternoon" />
+        <Picker.Item label="Evening" value="Evening" />
+        {/* Add more cattle options as needed */}
+      </Picker>
+    </View>
+    {/* Milk Quantity Input */}
+    <View style={styles.inputContainer}>
+      <Text style={styles.inputLabel}>Milk Quantity (gallons):</Text>
+      <TextInput
+        style={styles.input}
+        keyboardType="numeric"
+        value={milkQuantity}
+        onChangeText={(text) => setMilkQuantity(text)}
+      />
+    </View>
+
+    {/* Collect Milk Button */}
+    <TouchableOpacity style={styles.collectMilkButton} onPress={handleMilkCollection}>
+      <Text style={styles.collectMilkButtonText}>Collect</Text>
+    </TouchableOpacity>
+  </View>
+</Modal>
+
     </View>
   );
 };
 
+const colors = {
+  background: '#F5F6F8', // Light gray
+  primary: '#E1E9F0', // Green
+  text: '#333333', // Dark gray
+  headerBackground: '#E1E9F0', // Dark blue
+};
+
 const styles = StyleSheet.create({
-  iconsContainer: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    backgroundColor:'white'
-  },
-  iconImage: {
-    width: 48,
-    height: 48,
-  },
-  container: {
+
+  modalContainer: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#F5F5F8', // Set the background color to black
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    margin: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  heading: {
-    fontSize: 24,
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  modalTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
-    color: 'black', // Set text color to white
-  },
-  totalText: {
-    fontSize: 16,
-    color: 'black', // Set text color to white
-  },
-  iconLabel: {
-    marginTop: 8,
-    color: 'black',
-    fontSize: 16,
-    fontWeight:'bold',
-    // Set text color to white
-  },
-  
-  totalContainer: {
     marginBottom: 20,
-    flexDirection:'row',
   },
-  whiteText: {
-    color: 'black',
-    fontWeight:'bold', // Set text color to white
+  inputContainer: {
+    marginBottom: 10,
+    width: '100%',
   },
-  iconRow: {
-    flexDirection: 'row',
-    marginBottom: 16,
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color:'black',
   },
-  iconContainer: {
-    alignItems: 'center',
-    marginRight: 24,
+  picker: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    borderWidth: 4,
+    borderColor:'black',
+    color: colors.text,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
   },
-  iconLabel: {
-    marginTop: 8,
+  datePicker: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
   },
-  moreIconContainer: {
-    alignItems: 'center',
-    marginTop: 8,
+  input: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: 'white',
+    borderRadius: 0,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: colors.primary,
+  },
+  collectMilkButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  collectMilkButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   modalContainer: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 16,
+    flex: 1,
+    backgroundColor: colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
-  modalHeading: {
+  modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  allIconsContainer: {
-    justifyContent: 'center',
+    color: colors.text,
+    marginBottom: 20,
   },
 
-  topContainer: {
+  cardSection: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 10,
+  },
+
+  usageRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  usageColumn: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  usageLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  usageValue: {
+    fontSize: 14,
+    color: colors.text,
+  },
+  summaryCard: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 10,
+  },
+  summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    marginBottom: 5,
   },
-  farmInfoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  summaryLabel: {
+    fontSize: 16,
+    color: colors.text,
   },
-  logo: {
-    width: 40,
-    height: 40,
-    marginRight: 10,
+  summaryValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
   },
-  farmName: {
+  section: {
+    marginTop: 20,
+  },
+  sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: 10,
   },
-  notificationContainer: {
+ 
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    backgroundColor: colors.headerBackground,
   },
-    icon: {
-    width: 24,
-    height: 24,
-    marginHorizontal: 10,
+  backButton: {
+    // Add back button styles
   },
-  flatListsContainer: {
+  greeting: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginLeft: 10,
+    color:'black',
+    fontStyle:'italic',
+  },
+  card: {
+    backgroundColor: colors.background,
+    borderRadius: 8,
+    elevation: 4,
+    padding: 20,
+    margin: 20,
+    
+  },
+  card1: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    elevation: 4,
+    padding: 10,
+    margin: 10,
+    width:90,
+  },
+  collectButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  StatementsButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  StatementsButttonText: {
+    color: 'black',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  collectButtonText: {
+    color: 'black',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 8,
     flex: 1,
-    marginBottom: 16, 
-    backgroundColor: '#f9f9f9',// Add some margin to separate the reports container
+    marginRight: 10,
   },
-  reportsContainer: {
-    padding: 16,
-    backgroundColor: '#f9f9f9', // Set background color for the reports container
+  buttonText: {
+    color: 'black',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
+  setPriceButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    alignSelf: 'center',
+    marginTop: 20,
+  },
+  setPriceButtonText: {
+    color: 'black',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  // Add more styles for additional components
 });
 
 export default MilkScreen;

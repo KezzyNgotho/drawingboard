@@ -1,19 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity,StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity,StyleSheet ,ScrollView} from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import {Picker} from '@react-native-picker/picker';
-const RegisterNewCattle = ({ isVisible, onRegister }) => {
+const RegisterNewCattle = ({ isVisible, onRegister, onCancel }) => {
     const [name, setName] = useState('');
     const [age, setAge] = useState('');
     const [breed, setBreed] = useState('');
     const [isMale, setIsMale] = useState(true);
     const [isPregnant, setIsPregnant] = useState(false);
     const [isFertile, setIsFertile] = useState(true);
+    const [isRegisterVisible, setIsRegisterVisible] = useState(false);
   
     if (!isVisible) {
       return null;
     }
-  
+    /* const handleonCancel = () => {
+      setIsRegisterVisible(false);
+    }; */
+    const handleonCancel = () => {
+      onCancel(); // Call the onCancel function passed as a prop
+    };
     const handleRegister = () => {
       const newCattle = {
         name,
@@ -33,6 +39,7 @@ const RegisterNewCattle = ({ isVisible, onRegister }) => {
     };
   
     return (
+      <ScrollView>
       <View style={styles.card}>
         <Text style={styles.title}>Register New Cattle</Text>
         <TextInput
@@ -91,25 +98,50 @@ const RegisterNewCattle = ({ isVisible, onRegister }) => {
             onValueChange={setIsFertile}
           />
         </View>
-        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-          <Text style={styles.buttonText}>Register</Text>
-        </TouchableOpacity>
+
+        <View style={styles.buttonContainer}>
+         
+          <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+            <Text style={styles.buttonText}>Register</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.backButton} onPress={handleonCancel}>
+            <Text style={styles.buttonText}>Back</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+      </ScrollView>
     );
   };
 const styles= StyleSheet.create({
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  backButton: {
+    backgroundColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    flex: 1,
+    marginRight: 5,
+    marginTop: 10,
+   
+  },
+  registerButton: {
+    backgroundColor: '#E1E9F0',
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 10,
+    width:160,
+    marginRight: 15,
+  },
     card: {
         padding: 20,
         backgroundColor: 'white',
         borderRadius: 8,
         marginBottom: 20,
       },
-      registerButton: {
-        backgroundColor: '#E1E9F0',
-        borderRadius: 8,
-        padding: 10,
-        marginTop: 10,
-      },
+     
       buttonText: {
         textAlign: 'center',
         color:'black',

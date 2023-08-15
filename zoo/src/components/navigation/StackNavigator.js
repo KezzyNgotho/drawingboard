@@ -10,6 +10,10 @@ import ExpensesScreen from '../../screens/ExpensesScreen';
 import NotificationScreen from '../../screens/NotificationScreen';
 import SignupScreen from "../../screens/SignupScreen";
 import LoginScreen from "../../screens/LoginScreen";
+import CattleDetailsScreen from "../../screens/CattleDetailsScreen";
+import FeedManagementScreen from "../../screens/FeedManagementScreen";
+
+  import EditCattleDetailsScreen from "../../screens/EditCattleDetailsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +36,9 @@ const MainStackNavigator = () => {
       <Stack.Screen options={{ headerShown: false }} name="Milk" component={MilkScreen} />
       <Stack.Screen options={{ headerShown: false }} name="Expenses" component={ExpensesScreen} />
       <Stack.Screen options={{ headerShown: false }} name="Notification" component={NotificationScreen} />
+      <Stack.Screen options={{ headerShown: false }} name="CattleDetails" component={CattleDetailsScreen} />
+      <Stack.Screen options={{ headerShown: false }} name="EditCattleDetails" component={EditCattleDetailsScreen} />
+      <Stack.Screen options={{ headerShown: false }} name="Feed" component={FeedManagementScreen} />
     </Stack.Navigator>
   );
 }

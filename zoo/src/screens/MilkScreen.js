@@ -2,7 +2,7 @@ import React, {useState}from 'react';
 import { View, Text, StyleSheet, TouchableOpacity,ScrollView,Modal,TextInput } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import {Picker} from '@react-native-picker/picker';
-import {DatePicker} from 'react-native-datepicker'
+import DateTimePicker from '@react-native-community/datetimepicker';
 const MilkScreen = () => {
 
   const [isCollectingMilk, setIsCollectingMilk] = useState(false);
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 22,
-    fontWeight: '700',
+   fontWeight: '700',
     marginLeft: 10,
     color:'black',
     fontStyle:'italic',

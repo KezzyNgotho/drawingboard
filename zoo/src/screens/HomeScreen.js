@@ -1,7 +1,8 @@
-import React from 'react';
+import React,{useState,useEffect} from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity ,ScrollView} from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
+import firebase from '../components/firebase';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -19,21 +20,42 @@ const HomeScreen = () => {
   } else {
     greeting = 'Good evening!!';
   }
-
+  const [farmName, setFarmName] = useState('');
+  useEffect(() => {
+    const fetchFarmName = async () => {
+      try {
+        const user = firebase.auth().currentUser;
+        if (user) {
+          const userDocRef = firebase.firestore().collection('users').doc(user.uid);
+          const userDoc = await userDocRef.get();
+          const userData = userDoc.data();
+          if (userData && userData.farmName) {
+            setFarmName(userData.farmName);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching farm name:', error.message);
+      }
+    };
+  
+    fetchFarmName();
+  }, []);
+  
   return (
     <ScrollView style={styles.container}>
       {/* Top Container */}
       <View style={styles.topContainer}>
-        <View style={styles.farmInfoContainer}>
-          <Image source={require('../assets/icons8-farm-40.png')} style={styles.logo} resizeMode="contain" />
-          <Text style={styles.farmName}>Farm Name</Text>
-        </View>
+      <View style={styles.farmInfoContainer}>
+  <Image source={require('../assets/icons8-farm-48.png')} style={styles.logo} resizeMode="contain" />
+  <Text style={styles.farmName}>{farmName}</Text>
+</View>
+
         <View style={styles.notificationContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Tasks')}>
             <Image source={require('../assets/icons8-bell-50.png')} style={styles.icon} resizeMode="contain" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Menu')}>
-            <Image source={require('../assets/icons8-menu-50.png')} style={styles.icon} resizeMode="contain" />
+          <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+            <Image source={require('../assets/icons8-settings-50.png')} style={styles.icon} resizeMode="contain" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
             <Image source={require('../assets/icons8-user-48.png')} style={styles.icon} resizeMode="contain" />
@@ -113,6 +135,11 @@ const colors = {
 };
 
 const styles = StyleSheet.create({
+  farmName:{
+fontSize:26,
+fontWeight:"900",
+color: colors.primary,
+  },
   // ... (existing styles)
   greetingContainer: {
     flexDirection: 'row',
@@ -174,10 +201,7 @@ const styles = StyleSheet.create({
     height: 40,
     marginRight: 10,
   },
-  farmName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+ 
   notificationContainer: {
     flexDirection: 'row',
     alignItems: 'center',

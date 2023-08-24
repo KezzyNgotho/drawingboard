@@ -1,14 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import firebase from '../components/firebase'
 
 const LoginScreen = () => {
   const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    // Implement the functionality to handle the login logic and navigate to the Home screen.
-    // For simplicity, let's navigate to the HomeScreen without any actual login logic.
-    navigation.navigate('Main');
+  const handleLogin = async () => {
+    try {
+      // Check if any field is empty
+      if (email === '' || password === '') {
+        setError('Email and password are required');
+        return;
+      }
+
+      // Log in the user with email and password
+      await firebase.auth().signInWithEmailAndPassword(email, password);
+
+      // User logged in successfully, navigate to the main screen or any protected screen
+      navigation.navigate('Main');
+    } catch (error) {
+      // Handle authentication errors
+      console.error('Failed to log in:', error);
+      setError('Failed to log in. Please check your credentials.');
+    }
   };
 
   return (
@@ -21,6 +39,8 @@ const LoginScreen = () => {
         placeholder="Email"
         keyboardType="email-address"
         autoCapitalize="none"
+        value={email}
+        onChangeText={text => setEmail(text)}
       />
 
       {/* Password Input */}
@@ -29,7 +49,12 @@ const LoginScreen = () => {
         placeholder="Password"
         secureTextEntry
         autoCapitalize="none"
+        value={password}
+        onChangeText={text => setPassword(text)}
       />
+
+      {/* Error Message */}
+      {error !== '' && <Text style={styles.errorText}>{error}</Text>}
 
       {/* Login Button */}
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
@@ -79,6 +104,10 @@ const styles = StyleSheet.create({
   signupLink: {
     marginTop: 15,
     color: 'blue',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
   },
 });
 

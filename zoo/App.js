@@ -1,10 +1,11 @@
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import React from 'react';
+import React ,{useState,useEffect}from 'react';
 import { MainStackNavigator, LoginStackNavigator } from '../zoo/src/components/navigation/StackNavigator';
-
+import firebase from '../zoo/src/components/firebase';
 const Tab = createMaterialBottomTabNavigator();
+
 
 const Lighttheme = {
   ...DefaultTheme,
@@ -33,7 +34,10 @@ const Darktheme = {
 
 
 const App = () => {
-  const isDarkTheme = 'dark';
+  const [isDarkTheme, setIsDarkTheme] = useState('light'); // Initialize with a default theme
+
+  // Check Firebase auth state to determine the user's theme preference
+  
 
   return (
     <PaperProvider theme={isDarkTheme === 'dark' ? Darktheme : Lighttheme}>

@@ -11,8 +11,14 @@ import NotificationScreen from '../../screens/NotificationScreen';
 import SignupScreen from "../../screens/SignupScreen";
 import LoginScreen from "../../screens/LoginScreen";
 import CattleDetailsScreen from "../../screens/CattleDetailsScreen";
-import FeedManagementScreen from "../../screens/FeedManagementScreen";
-
+import FeedManagementScreen from "../../screens/FeedManagementScreen"; 
+import HealthManagementScreen from "../../screens/HealthManagementScreen";
+import TaskReminderScreen from "../../screens/TaskReminderScreen";
+import StatementsScreen from "../../screens/StatementsScreen";
+import AnalyticsScreen from "../../screens/AnalyticsScreen";
+import SalesScreen from "../../screens/SalesScreen";
+import SettingsScreen from "../../screens/SettingsScreen";
+import ProfileScreen from "../../screens/ProfileScreen";
   import EditCattleDetailsScreen from "../../screens/EditCattleDetailsScreen";
 
 const Stack = createNativeStackNavigator();
@@ -39,6 +45,14 @@ const MainStackNavigator = () => {
       <Stack.Screen options={{ headerShown: false }} name="CattleDetails" component={CattleDetailsScreen} />
       <Stack.Screen options={{ headerShown: false }} name="EditCattleDetails" component={EditCattleDetailsScreen} />
       <Stack.Screen options={{ headerShown: false }} name="Feed" component={FeedManagementScreen} />
+      <Stack.Screen options={{ headerShown: false }} name="Health" component={HealthManagementScreen} />
+      <Stack.Screen options={{ headerShown: false }} name="Tasks" component={TaskReminderScreen} />
+      <Stack.Screen options={{ headerShown: false }} name="Statements" component={StatementsScreen} />
+      
+      <Stack.Screen options={{ headerShown: false }} name="Analytics" component={AnalyticsScreen} />
+      <Stack.Screen options={{ headerShown: false }} name="Sales" component={SalesScreen} />
+      <Stack.Screen options={{ headerShown: false }} name="Settings" component={SettingsScreen} />
+      <Stack.Screen options={{ headerShown: false }} name="Profile" component={ProfileScreen} />
     </Stack.Navigator>
   );
 }

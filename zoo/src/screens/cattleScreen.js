@@ -1,38 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput,Image, ScrollView ,RadioButton} from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import {Picker} from '@react-native-picker/picker';
 import RegisterNewCattle from '../components/RegisterNewCattle';
 import { useNavigation } from '@react-navigation/native';
+import firebase from '../components/firebase';
 
 
 
-const CattleDetails = ({ cattle }) => {
 
-  
+  const CattleDetails = ({ cattle,setCattleList }) => {
+    if (!cattle) {
+      return null;
+    }
+ 
+ 
   const navigation = useNavigation();
 
   const handleEditDetails = () => {
     navigation.navigate('CattleDetails', { cattle });
   };
-  if (!cattle) {
-    return null; // or render a placeholder if needed
-  }
+  
+  const handleDeleteCattle = async (cattleId) => {
+    try {
+      const user = firebase.auth().currentUser;
+      if (user) {
+        const cattleRef = firebase.firestore().collection('cattle').doc(cattleId);
+        await cattleRef.delete();
+        // After successful deletion, update your local cattleList state to remove the deleted cattle.
+        setCattleList((prevCattleList) => prevCattleList.filter((cattle) => cattle.id !== cattleId));
+      } else {
+        console.log('No user found.');
+      }
+    } catch (error) {
+      console.error('Error deleting cattle:', error.message);
+    }
+  };
+
 
   return (
     <View style={styles.card}>
+      
       <Text style={styles.header}>Cattle Details</Text>
       <Text style={styles.buttonText}>Name: {cattle.name}</Text>
+      <Text style={styles.buttonText}>ID: {cattle.id}</Text>
       <Text style={styles.buttonText}>Age: {cattle.age}</Text>
       <Text style={styles.buttonText}>Breed: {cattle.breed}</Text>
       <Text style={styles.buttonText}>Gender: {cattle.isMale ? 'Male' : 'Female'}</Text>
       <Text style={styles.buttonText}>Pregnant: {cattle.isPregnant ? 'Yes' : 'No'}</Text>
       <Text style={styles.buttonText}>Fertile: {cattle.isFertile ? 'Yes' : 'No'}</Text>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.editButton}  onPress={handleEditDetails}>
-          <Text style={styles.buttonText1}>Edit Details</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton}>
+      <TouchableOpacity style={styles.editButton} onPress={handleEditDetails}>
+        <Text style={styles.buttonText1}>Edit Details</Text>
+      </TouchableOpacity>
+        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteCattle(cattle.id)}>
           <Text style={styles.buttonText1}>Delete Cattle</Text>
         </TouchableOpacity>
       </View>
@@ -41,22 +62,19 @@ const CattleDetails = ({ cattle }) => {
 };
 
 const CattleSummary = ({ cattleList }) => {
-  const totalCattle = cattleList.length;
-  // Calculate counts of different cattle types (male, female, pregnant, infertile)
-  // For the sake of example, let's assume you have these counts available
-  const maleCount = 10;
-  const femaleCount = 15;
-  const pregnantCount = 5;
-  const infertileCount = 2;
+  const maleCount = cattleList.filter(cattle => cattle.isMale).length;
+  const femaleCount = cattleList.filter(cattle => !cattle.isMale).length;
+  const pregnantCount = cattleList.filter(cattle => cattle.isPregnant).length;
+  const infertileCount = cattleList.filter(cattle => !cattle.isFertile).length;
 
   return (
     <View style={styles.card}>
       <Text style={styles.header}>Cattle Summary</Text>
-      <Text style={styles.buttonText}>Total Cattle: {totalCattle}</Text>
-      <Text   style={styles.buttonText}>Male: {maleCount}</Text>
-      <Text  style={styles.buttonText}>Female: {femaleCount}</Text>
-      <Text   style={styles.buttonText}>Pregnant: {pregnantCount}</Text>
-      <Text   style={styles.buttonText}>Infertile: {infertileCount}</Text>
+      <Text style={styles.buttonText}>Total Cattle: {cattleList.length}</Text>
+      <Text style={styles.buttonText}>Male: {maleCount}</Text>
+      <Text style={styles.buttonText}>Female: {femaleCount}</Text>
+      <Text style={styles.buttonText}>Pregnant: {pregnantCount}</Text>
+      <Text style={styles.buttonText}>Infertile: {infertileCount}</Text>
     </View>
   );
 };
@@ -78,19 +96,49 @@ const GenerateStatement = () => {
 };
 
 const CattleScreen = () => {
-  const [cattleList, setCattleList] = useState([]);
-  const [isRegisterVisible, setIsRegisterVisible] = useState(false); // Initially not visible
+  const [cattleList, setCattleList] = useState([]); // Initialize as an empty array
+  const [isRegisterVisible, setIsRegisterVisible] = useState(false);
   const navigation = useNavigation();
+
   const handleRegisterCattle = (newCattle) => {
     setCattleList([...cattleList, newCattle]);
-    setIsRegisterVisible(false); // Hide the registration form after registering
+    setIsRegisterVisible(false);
   };
 
   const [searchQuery, setSearchQuery] = useState('');
   const filteredCattle = cattleList.filter(cattle =>
     cattle.name.toLowerCase().includes(searchQuery.toLowerCase())
-
   );
+
+  useEffect(() => {
+    const fetchCattleData = async () => {
+      try {
+        const user = firebase.auth().currentUser;
+        console.log('Current User:', user);
+  
+        if (user) {
+          const cattleCollection = firebase.firestore().collection('cattle');
+          const querySnapshot = await cattleCollection.where('userId', '==', user.uid).get();
+          const fetchedCattle = querySnapshot.docs.map(doc => doc.data());
+  
+          console.log('Fetched cattle data:', fetchedCattle);
+  
+          // Update cattleList with fetched data
+          setCattleList(fetchedCattle);
+        } else {
+          console.log('No user found.');
+        }
+      } catch (error) {
+        console.error('Error fetching cattle data:', error.message);
+      }
+    };
+  
+    // Call the function to fetch cattle data
+    fetchCattleData();
+  }, []); // Empty dependency array to fetch data only once when the component mounts
+ 
+  
+
 
   const handleonCancel = () => {
     // Navigate back to the previous screen
@@ -118,7 +166,8 @@ const CattleScreen = () => {
       </View>
       <ScrollView style={styles.content}>
         {cattleList.map((cattle, index) => (
-          <CattleDetails key={index} cattle={cattle} />
+        <CattleDetails key={index} cattle={cattle} setCattleList={setCattleList} />
+
         ))}
         </ScrollView>
         <TouchableOpacity
@@ -127,14 +176,18 @@ const CattleScreen = () => {
       >
         <Text style={styles.buttonText1}>Register New Cattle</Text>
        {/*  <RegisterNewCattle isVisible={isRegisterVisible} onRegister={handleRegisterCattle} /> */}
-        <RegisterNewCattle
-        isVisible={isRegisterVisible}
-        onRegister={handleRegisterCattle}
-        onCancel={handleonCancel}
-      />
+       <RegisterNewCattle
+  isVisible={isRegisterVisible}
+  onRegister={handleRegisterCattle}
+  onCancel={handleonCancel}
+  cattleList={cattleList}
+  setCattleList={setCattleList}
+/>
+
       
       </TouchableOpacity>
         <CattleSummary cattleList={cattleList} />
+        
        {/*  <GenerateStatement /> */}
        <TouchableOpacity style={styles.generateButton}><Text style={styles.buttonText1}>GENERATE STATEMENTS</Text></TouchableOpacity>
     </View>
@@ -172,14 +225,24 @@ const styles = StyleSheet.create({
     color:'black',
    
   },
-  searchInput: {
+ /*  searchInput: {
     borderWidth: 1,
     borderColor: 'black',
     borderRadius: 8,
     padding: 10,
     color:'black',
     marginBottom: 16,
+  }, */
+  searchInput: {
+    borderWidth: 1,
+    borderColor: 'black',
+    borderRadius: 8,
+    padding: 10,
+    color:'black',
+    marginBottom: 10,
+    width: '100%', // Adjust the width as needed
   },
+  
   content: {
     marginBottom: 16,
   },

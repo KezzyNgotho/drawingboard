@@ -35,7 +35,7 @@ const BottomTabNavigator = () => {
           tabBarLabel: 'Cattle',
           tabBarIcon: ({ color }) => (
             <Image
-              source={require('../../assets/icons8-menu-50.png')}
+              source={require('../../assets/cow.png')}
               style={{ tintColor: color, width: 37, height: 30 }}
             />
           ),

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, KeyboardAvoidingView,Image } from 'react-native';
 import moment from 'moment';
 import { useNavigation } from '@react-navigation/native';
+import firebase from '../components/firebase';
 
 const ExpenseScreen = () => {
   const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
@@ -11,6 +12,34 @@ const ExpenseScreen = () => {
     { id: 2, date: '2023-08-02', description: 'Gas', amount: 30 },
     // ... other initial expenses
   ]);
+  useEffect(() => {
+    // Get the currently authenticated user
+    const user = firebase.auth().currentUser;
+  
+    if (user) {
+      const userId = user.uid;
+      const expensesCollection = firebase.firestore().collection('expenses');
+  
+      // Query expenses for the current user
+      expensesCollection
+        .where('userId', '==', userId)
+        .get()
+        .then((querySnapshot) => {
+          const fetchedExpenses = [];
+  
+          querySnapshot.forEach((doc) => {
+            fetchedExpenses.push(doc.data());
+          });
+  
+          // Update the expenses state with fetched data
+          setExpenses(fetchedExpenses);
+        })
+        .catch((error) => {
+          console.error('Error fetching expenses:', error.message);
+        });
+    }
+  }, []);
+  
   const [newExpenseDescription, setNewExpenseDescription] = useState('');
   const [newExpenseAmount, setNewExpenseAmount] = useState('');
   const [showNewExpenseFields, setShowNewExpenseFields] = useState(false);
@@ -20,18 +49,35 @@ const ExpenseScreen = () => {
 
   const handleAddExpense = () => {
     if (newExpenseDescription && newExpenseAmount) {
-      const newExpense = {
-        id: expenses.length + 1,
-        date: selectedDate,
-        description: newExpenseDescription,
-        amount: parseFloat(newExpenseAmount),
-      };
-      setExpenses([...expenses, newExpense]);
-      setNewExpenseDescription('');
-      setNewExpenseAmount('');
-      setShowNewExpenseFields(false);
+      const user = firebase.auth().currentUser;
+  
+      if (user) {
+        const userId = user.uid;
+        const newExpense = {
+          userId, // Associate the expense with the current user
+          id: expenses.length + 1,
+          date: selectedDate,
+          description: newExpenseDescription,
+          amount: parseFloat(newExpenseAmount),
+        };
+  
+        // Save the new expense to Firestore
+        const expensesCollection = firebase.firestore().collection('expenses');
+        expensesCollection.add(newExpense)
+          .then(() => {
+            // Update the local expenses state with the new expense
+            setExpenses([...expenses, newExpense]);
+            setNewExpenseDescription('');
+            setNewExpenseAmount('');
+            setShowNewExpenseFields(false);
+          })
+          .catch((error) => {
+            console.error('Error adding expense:', error.message);
+          });
+      }
     }
   };
+  
 
   const handleSearch = () => {
     const filteredExpenses = expenses.filter(expense =>

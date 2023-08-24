@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import firebase from '../components/firebase';
 
 const SignupScreen = () => {
   const navigation = useNavigation();
@@ -12,11 +13,32 @@ const SignupScreen = () => {
   const [location, setLocation] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [position, setPosition] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSignup = () => {
-    // Implement the functionality to handle the signup logic and navigate to the login screen.
-    // For simplicity, let's navigate to the LoginScreen without any actual signup logic.
-    navigation.navigate('LoginScreen');
+  const handleSignup = async () => {
+    try {
+      // Sign up the user with email and password
+      await firebase.auth().createUserWithEmailAndPassword(email, password);
+
+      // User signed up successfully, now you can add additional data to Firestore
+      const currentUser = firebase.auth().currentUser;
+      if (currentUser) {
+        const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
+        await userRef.set({
+          username,
+          email,
+          farmName,
+          location,
+          mobileNumber,
+          position,
+        });
+      }
+
+      navigation.navigate('Login'); // Redirect to the login screen after successful sign-up
+    } catch (error) {
+      // Handle the error, e.g., show an error message
+      setError('Failed to sign up: ' + error.message);
+    }
   };
 
   return (
@@ -76,7 +98,7 @@ const SignupScreen = () => {
         value={position}
         onChangeText={text => setPosition(text)}
       />
-
+ {error !== '' && <Text style={styles.errorText}>{error}</Text>}
       <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
@@ -89,6 +111,10 @@ const SignupScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
